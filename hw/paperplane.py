@@ -95,24 +95,40 @@ dt0 = 0.035 #angle step in radians
 N_v0 = int(v0_max/dv0) + 1 
 N_t0 = int(thetha0_max/dt0 ) + 1 
 
-ini_values = numpy.array([[i,j] for i in numpy.linspace(0.5,v0_max,N_v0) 
-for j in numpy.linspace(0,thetha0_max,N_t0)])
-
-
-triples = numpy.empty_like(ini_values,dtype=numpy.ndarray)
-for i,v0_theta0 in enumerate(ini_values):
-       
+max_distances = numpy.zeros((N_v0,N_t0))
+#ini_values = numpy.array([[i,j] for i in numpy.linspace(0.5,v0_max,N_v0) 
+#for j in numpy.linspace(0,thetha0_max,N_t0)])
+#
+#
+#triples = numpy.empty_like(ini_values,dtype=numpy.ndarray)
+#for i,v0_theta0 in enumerate(ini_values):
+v0_values = numpy.linspace(0.5,v0_max,N_v0) 
+theta0_values = numpy.linspace(0,thetha0_max,N_t0)
+for i in range(N_v0):
+    v0 = v0_values[i]
+    for j in range(N_t0):
+        theta0 = theta0_values[j]
+        
+        
+        
+    
 
    
-    v0,theta0 = v0_theta0
-    dt = 0.001    
-    u,T = time_loop(numpy.array([v0, theta0, x0, y0]),dt)
-    triples[i]= [v0_theta0, u[:,2][-1]]
-     
-max_ind = triples[:,1].argmax()
-v0,theta0 = triples[max_ind][0]
+    
+        dt = 0.001    
+        u,T = time_loop(numpy.array([v0, theta0, x0, y0]),dt)
+        max_distances[i,j]=  u[:,2][-1]
+
+
+max_dist =  max_distances.max()    
+max_ind = numpy.where( max_distances == max_dist )
+max_ind = zip(max_ind[0],max_ind[1])[0]
+v0 = v0_values[max_ind[0]]
+
+theta0 = theta0_values[max_ind[1]] 
+
 print "Maximum distance is %.2f. \
-Initial values: v0 = %.2f, t0 = %.2f" % (v0,theta0,triples[max_ind][1])
+Initial values: v0 = %.2f, t0 = %.2f" % (max_dist,v0,theta0)
 
 
 
@@ -130,3 +146,11 @@ plt.xlabel(r'x', fontsize=18)
 plt.ylabel(r'y', fontsize=18)
 plt.title('Glider trajectory, flight time = %.2f , distance = %.2f' % (T,max(x)), fontsize=18)
 plt.plot(x,y, 'k-', lw=2);
+
+plt.figure(figsize=(8,6))
+plt.pcolor(max_distances)
+plt.colorbar()
+plt.ylabel(r'$v_0$', fontsize=18)
+plt.xlabel(r'$\theta_0$', fontsize=18)
+plt.suptitle('Maximum distance (in m) for different initial conditions.', fontsize=18)
+plt.show()
