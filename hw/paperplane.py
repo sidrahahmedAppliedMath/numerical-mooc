@@ -56,8 +56,45 @@ def euler_step(u, f, dt):
     
     return u + dt * f(u)
 
+def euler_midpoint_step(u, f, dt):
+    """Returns the solution at the next time-step using Euler's method with 
+    middle point.
+    
+    Parameters
+    ----------
+    u : array of float
+        solution at the previous time-step.
+    f : function
+        function to compute the right hand-side of the system of equation.
+    dt : float
+        time-increment.
+    
+    Returns
+    -------
+    u_n_plus_1 : array of float
+        approximate solution at the next time step.
+    """
+    u_star = u + 0.5*dt * f(u)
+    return u + dt * f(u_star)
 
 def time_loop(u0,dt):
+    """Returns the array of u vectors at each time step
+    
+    Parameters
+    ----------
+    u0 : array of float
+         initial conditions
+    dt : float
+         time step
+         
+    Returns
+    -------
+    u : array of u arrays with shape (n,4), n - number of time steps while y >0
+    T : float
+        final time
+
+    """
+    
     u = numpy.zeros((1, 4))
     u[0] = u0 # fill 1st element with initial values
     # time loop - Euler method
@@ -67,9 +104,43 @@ def time_loop(u0,dt):
     n=0
     while y >0:
     
-        
-        u = numpy.append(u,[euler_step(u[n], f, dt)],axis = 0)
+#        u = numpy.resize(u,(n+2,4))
+#        u[n+1] = euler_step(u[n], f, dt)
+        u = numpy.append(u,[euler_midpoint_step(u[n], f, dt)],axis = 0)
         y = u[n+1,3]
+        n=n+1
+        T+=dt
+    
+    return u,T
+
+def time_loop_for_cycle(u0,dt):
+    """Returns the u vector at final time step
+    
+    Parameters
+    ----------
+    u0 : array of float
+         initial conditions
+    dt : float
+         time step
+         
+    Returns
+    -------
+    u : array of float
+    T : float
+        final time
+
+    """
+    u = numpy.copy(u0) # fill 1st element with initial values
+    # time loop - Euler method
+    T = 0                               # final time
+    
+    y=u0[3]
+    n=0
+    while y >0:
+    
+        u = euler_midpoint_step(u, f, dt)
+#        u = numpy.append(u,[euler_step(u[n], f, dt)],axis = 0)
+        y = u[3]
         n=n+1
         T+=dt
     
@@ -103,21 +174,15 @@ max_distances = numpy.zeros((N_v0,N_t0))
 #triples = numpy.empty_like(ini_values,dtype=numpy.ndarray)
 #for i,v0_theta0 in enumerate(ini_values):
 v0_values = numpy.linspace(0.5,v0_max,N_v0) 
-theta0_values = numpy.linspace(0,thetha0_max,N_t0)
+theta0_values = numpy.linspace(-0.5,thetha0_max,N_t0)
 for i in range(N_v0):
     v0 = v0_values[i]
     for j in range(N_t0):
         theta0 = theta0_values[j]
         
-        
-        
-    
-
-   
-    
         dt = 0.001    
-        u,T = time_loop(numpy.array([v0, theta0, x0, y0]),dt)
-        max_distances[i,j]=  u[:,2][-1]
+        u,T = time_loop_for_cycle(numpy.array([v0, theta0, x0, y0]),dt)
+        max_distances[i,j]=  u[2]
 
 
 max_dist =  max_distances.max()    
@@ -151,6 +216,10 @@ plt.figure(figsize=(8,6))
 plt.pcolor(max_distances)
 plt.colorbar()
 plt.ylabel(r'$v_0$', fontsize=18)
+ylocs,ylabels = plt.yticks()
+plt.yticks(ylocs[:-1],tuple('%.2f' % v0_values[int(i)] for i in ylocs[:-1]))
 plt.xlabel(r'$\theta_0$', fontsize=18)
+xlocs,xlabels = plt.xticks()
+plt.xticks(xlocs[:-1],tuple('%.2f' % theta0_values[int(i)] for i in xlocs[:-1]))
 plt.suptitle('Maximum distance (in m) for different initial conditions.', fontsize=18)
 plt.show()
