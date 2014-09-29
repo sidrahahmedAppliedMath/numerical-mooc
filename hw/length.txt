@@ -1,0 +1,2 @@
+Maximum distance is 16.70. Initial values: v0 = 10.10, t0 = -0.34
+
