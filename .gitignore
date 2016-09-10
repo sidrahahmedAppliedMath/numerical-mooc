@@ -7,3 +7,6 @@ lessons/03_wave/traffic.pyc
 *.pyc
 .env
 >>>>>>> numerical-mooc/master
+*.DS_Store
+*.checkpoint.ipynb
+*~
