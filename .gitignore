@@ -1,3 +1,4 @@
-lessons/phugoid/.ipynb_checkpoints/*checkpoint.ipynb
-hw/.ipynb_checkpoints/*checkpoint.ipynb
-lessons/03_wave/traffic.pyc
+*.ipynb_checkpoints
+*.pyc
+.env
+*.DS_Store
